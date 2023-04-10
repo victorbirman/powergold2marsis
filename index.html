@@ -54,7 +54,16 @@
 		</div>
 		<script>
 			"use strict";
-
+			const separadores = {
+				[0]: '"SEPARADORES"<>""<>"separador_billboard_02_auriculares"<>"6.44"<>"sepas"',
+				[1]: '"SEPARADORES"<>""<>"separador_billboard_03_glitch"<>"5.14"<>"sepas"',
+				[2]: '"SEPARADORES"<>""<>"separador_billboard_04_cables"<>"12.99"<>"sepas"',
+				[3]: '"SEPARADORES"<>""<>"separador_billboard_06_glitch"<>"3.95"<>"sepas"',
+				[4]: '"SEPARADORES"<>""<>"separador_billboard_08_esfera"<>"8.0"<>"sepas"',
+				[5]: '"SEPARADORES"<>""<>"separador_billboard_09_ondas"<>"9.98"<>"sepas"',
+				[6]: '"SEPARADORES"<>""<>"separador_billboard_10_general"<>"9.94"<>"sepas"',
+				[7]: '"SEPARADORES"<>""<>"separador_billboard_11_distort"<>"4.5"<>"sepas"',
+			};
 			const types = ["ENTREVISTAS", "TECH", "SEPARADORES", "NEWS", "TOP10"];
 			let output = [];
 			const input = document.querySelector("input");
@@ -76,6 +85,7 @@
 
 			function main(text) {
 				let index = 0;
+				let sepaIndex = 0;
 
 				const lines = text.replaceAll(`","`, `"<>"`).split(/\r?\n/);
 				for (let line of lines) {
@@ -85,7 +95,10 @@
 					if (types.includes(itemType(line))) {
 						output.push(makeMovie(itemToMovie(line, index)));
 					} else {
-						output.push(makeGraph(itemType(line), index));
+						output.push(
+							makeMovie(itemToMovie(separadores[sepaIndex++ % 8], index))
+						);
+						output.push(makeGraph(itemType(line), ++index));
 
 						output.push(makeSong(itemToSong(line, ++index)));
 					}
