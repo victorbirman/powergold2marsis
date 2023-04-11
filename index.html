@@ -86,21 +86,26 @@
 			function main(text) {
 				let index = 0;
 				let sepaIndex = 0;
+				text = text
+					.replaceAll(`,,,`, `","`)
+					.replaceAll(`,,`, `"`)
+					.replaceAll(`,END`, `"`)
+					.replaceAll(`""`, `"`);
 
 				const lines = text.replaceAll(`","`, `"<>"`).split(/\r?\n/);
-				for (let line of lines) {
-					if (!line) continue;
+				for (let i = lines.length; i >= 0; i--) {
+					if (!lines[i]) continue;
 
 					index++;
-					if (types.includes(itemType(line))) {
-						output.push(makeMovie(itemToMovie(line, index)));
+					if (types.includes(itemType(lines[i]))) {
+						output.push(makeMovie(itemToMovie(lines[i], index)));
 					} else {
 						output.push(
 							makeMovie(itemToMovie(separadores[sepaIndex++ % 8], index))
 						);
-						output.push(makeGraph(itemType(line), ++index));
+						output.push(makeGraph(itemType(lines[i]), ++index));
 
-						output.push(makeSong(itemToSong(line, ++index)));
+						output.push(makeSong(itemToSong(lines[i], ++index)));
 					}
 				}
 				createDatePicker();
