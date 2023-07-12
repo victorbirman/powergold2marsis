@@ -1,307 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie-edge" />
-		<title>Powergold To Marsis Exporter</title>
-		<style>
-			body {
-				margin: 20px;
-				padding: 10px;
-			}
-			.holder {
-				display: grid;
-				justify-content: center;
-			}
-			#date-picker {
-				font-size: 1.5em;
-				padding: 1em;
-				border-radius: 0.5em;
-				border: none;
-				box-shadow: 0 0 0.5em gray;
-				margin-top: 2em;
-				width: 10.7em;
-			}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Powergold To Marsis Exporter</title>
+    <style>
+      body {
+        margin: 20px;
+        padding: 10px;
+      }
 
-			#input {
-				display: none;
-			}
-			.custom-file-upload {
-				padding: 1em;
-				background-color: #3498db;
-				color: #fff;
-				border-radius: 4px;
-				cursor: pointer;
-				text-align: center;
-				font-size: 1.2em;
-				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-				transition: all 0.2s ease-in-out;
-			}
-			.custom-file-upload:hover {
-				background-color: #2980b9;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="holder">
-			<label for="input" class="custom-file-upload">
-				Elegir archivo powergold
-			</label>
-			<input type="file" name="input" id="input" />
+      .holder {
+        display: grid;
+        justify-content: center;
+      }
 
-			<div class="output"></div>
-		</div>
-		<script>
-			"use strict";
-			const separadores = {
-				[0]: '"SEPARADORES"<>""<>"separador_billboard_02_auriculares"<>"6.44"<>"sepas"',
-				[1]: '"SEPARADORES"<>""<>"separador_billboard_03_glitch"<>"5.14"<>"sepas"',
-				[2]: '"SEPARADORES"<>""<>"separador_billboard_04_cables"<>"12.99"<>"sepas"',
-				[3]: '"SEPARADORES"<>""<>"separador_billboard_06_glitch"<>"3.95"<>"sepas"',
-				[4]: '"SEPARADORES"<>""<>"separador_billboard_08_esfera"<>"8.0"<>"sepas"',
-				[5]: '"SEPARADORES"<>""<>"separador_billboard_09_ondas"<>"9.98"<>"sepas"',
-				[6]: '"SEPARADORES"<>""<>"separador_billboard_10_general"<>"9.94"<>"sepas"',
-				[7]: '"SEPARADORES"<>""<>"separador_billboard_11_distort"<>"4.5"<>"sepas"',
-			};
-			const types = ["ENTREVISTAS", "TECH", "SEPARADORES", "NEWS", "TOP10"];
-			let output = [];
-			const input = document.querySelector("input");
-			let day, month, year;
+      #date-picker {
+        font-size: 1.5em;
+        padding: 1em;
+        border-radius: 0.5em;
+        border: none;
+        box-shadow: 0 0 0.5em gray;
+        margin-top: 2em;
+        width: 10.7em;
+      }
 
-			input.addEventListener("change", function () {
-				const file = this.files[0];
-				const reader = new FileReader();
-				reader.readAsArrayBuffer(file);
+      #input {
+        display: none;
+      }
 
-				reader.onload = function () {
-					let ansiText = reader.result;
-					let utf8Text = new TextDecoder("windows-1252").decode(
-						new Uint8Array(ansiText)
-					);
-					main(utf8Text);
-				};
-			});
+      .custom-file-upload {
+        padding: 1em;
+        background-color: #3498db;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.2em;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        transition: all 0.2s ease-in-out;
+      }
 
-			function main(text) {
-				let index = 0;
-				let sepaIndex = 0;
-				text = text
-					.replaceAll(`,,,`, `","`)
-					.replaceAll(`,,`, `"`)
-					.replaceAll(`,END`, `"`)
-					.replaceAll(`""`, `"`);
+      .custom-file-upload:hover {
+        background-color: #2980b9;
+      }
 
-				const lines = text.replaceAll(`","`, `"<>"`).split(/\r?\n/);
-				for (let i = lines.length; i >= 0; i--) {
-					if (!lines[i]) continue;
+      .custom-file-upload.dragover {
+        background-color: #2980b9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="holder">
+      <label for="input" class="custom-file-upload">
+        Elegir archivo powergold
+      </label>
+      <input type="file" name="input" id="input" />
 
-					index++;
-					if (types.includes(itemType(lines[i]))) {
-						output.push(makeMovie(itemToMovie(lines[i], index)));
-					} else {
-						output.push(
-							makeMovie(itemToMovie(separadores[sepaIndex++ % 8], index))
-						);
-						output.push(makeGraph(itemType(lines[i]), ++index));
+      <div class="output"></div>
+    </div>
+    <script>
+      "use strict";
+      const separadores = {
+        0: '"SEPARADORES"<>""<>"separador_billboard_02_auriculares"<>"6.44"<>"sepas"',
+        1: '"SEPARADORES"<>""<>"separador_billboard_03_glitch"<>"5.14"<>"sepas"',
+        2: '"SEPARADORES"<>""<>"separador_billboard_04_cables"<>"12.99"<>"sepas"',
+        3: '"SEPARADORES"<>""<>"separador_billboard_06_glitch"<>"3.95"<>"sepas"',
+        4: '"SEPARADORES"<>""<>"separador_billboard_08_esfera"<>"8.0"<>"sepas"',
+        5: '"SEPARADORES"<>""<>"separador_billboard_09_ondas"<>"9.98"<>"sepas"',
+        6: '"SEPARADORES"<>""<>"separador_billboard_10_general"<>"9.94"<>"sepas"',
+        7: '"SEPARADORES"<>""<>"separador_billboard_11_distort"<>"4.5"<>"sepas"',
+      };
+      const types = ["ENTREVISTAS", "TECH", "SEPARADORES", "NEWS", "TOP10"];
+      let output = [];
+      const input = document.querySelector("input");
+      let day, month, year;
 
-						output.push(makeSong(itemToSong(lines[i], ++index)));
-					}
-				}
-				createDatePicker();
-			}
+      input.addEventListener("change", function () {
+        const file = this.files[0];
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
 
-			function itemType(line) {
-				return line.split("<>")[0].slice(1, -1);
-			}
+        reader.onload = function () {
+          let ansiText = reader.result;
+          let utf8Text = new TextDecoder("windows-1252").decode(
+            new Uint8Array(ansiText)
+          );
+          main(utf8Text);
+        };
+      });
 
-			function itemToSong(line, index) {
-				let singer = line.split("<>")[1].slice(1, -1).replaceAll("/", ",");
-				let song = line.split("<>")[2].slice(1, -1);
-				let dur = +line.split("<>")[3].slice(1, -1);
-				let category = line.split("<>")[4].slice(1, -1);
+      // Add event listeners for drag and drop
+      document.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        const filePicker = document.querySelector(".custom-file-upload");
+        filePicker.classList.add("dragover");
+      });
 
-				return { singer, song, dur, category, index };
-			}
+      document.addEventListener("drop", function (e) {
+        e.preventDefault();
+        const filePicker = document.querySelector(".custom-file-upload");
+        filePicker.classList.remove("dragover");
 
-			function itemToMovie(line, index) {
-				let name = line.split("<>")[2].slice(1, -1);
-				let dur = +line.split("<>")[3].slice(1, -1);
-				let category = line.split("<>")[4].slice(1, -1);
-				return { name, dur, category, index };
-			}
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          const reader = new FileReader();
+          reader.readAsArrayBuffer(file);
 
-			function makeSong({ singer, song, dur, category, index }) {
-				let name = `${singer}-''${song}''-`;
-				return {
-					TrimmerSettings: {
-						ScaleType: "",
-						Interlace: "",
-						AspectRatio: "",
-						Deinterlace: false,
-						CropL: 0,
-						CropR: 0,
-						CropT: 0,
-						CropB: 0,
-						AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
-					},
-					OriginalDuration: dur + "",
-					index: index,
-					ItemType: 1,
-					ItemObject: "Video",
-					IsLoop: false,
-					uniquePINumber: "j/11zVFV",
-					No: null,
-					Name: name,
-					DoubleIn: 0.0,
-					DoubleOut: dur,
-					DoubleDuration: dur,
-					Path: `D:\\Videos\\${category}\\${name}.mp4`,
-				};
-			}
+          reader.onload = function () {
+            let ansiText = reader.result;
 
-			function makeMovie({ name, dur, category, index }) {
-				return {
-					TrimmerSettings: {
-						ScaleType: "",
-						Interlace: "",
-						AspectRatio: "",
-						Deinterlace: false,
-						CropL: 0,
-						CropR: 0,
-						CropT: 0,
-						CropB: 0,
-						AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
-					},
-					OriginalDuration: dur + "",
-					index: index,
-					ItemType: 1,
-					ItemObject: "Video",
-					IsLoop: false,
-					uniquePINumber: "j/11zVFV",
-					No: null,
-					Name: name,
-					DoubleIn: 0.0,
-					DoubleOut: dur,
-					DoubleDuration: dur,
-					Path: `D:\\Videos\\${category}\\${name}.mp4`,
-				};
-			}
+            // Check if the text is encoded in ANSI
+            if (!isUTF8(ansiText)) {
+              let utf8Text = new TextDecoder("windows-1252").decode(
+                new Uint8Array(ansiText)
+              );
+              main(utf8Text);
+            } else {
+              // Text is already encoded in UTF-8, pass it directly to main()
+              main(ansiText);
+            }
+          };
 
-			function makeGraph(glo, index) {
-				const pagename = () => {
-					if (glo.match(/H/)) return "H100";
-					if (glo.match(/G[0]/)) return "G100";
-					if (glo.match(/G[1]/)) return "G200";
-					if (glo.match(/G[2]/)) return "G200";
-				};
-				return {
-					TrimmerSettings: {
-						ScaleType: "",
-						Interlace: "",
-						AspectRatio: "",
-						Deinterlace: false,
-						CropL: 0,
-						CropR: 0,
-						CropT: 0,
-						CropB: 0,
-						AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
-					},
-					OriginalDuration: "0",
-					AutoStartDate: "",
-					AutoStartTime: "",
-					index: index,
-					ItemType: 14,
-					ItemObject: {
-						CGUniqueID: "1148d94eb5594a36b607dec865c709d5",
-						addedPresetList: [
-							{
-								projectName: "Marsis CG Test Project",
-								pageName: pagename(),
-								itemList: [{ itemShowName: glo }],
-								isGroup: false,
-								positionList: [
-									{
-										positionInSeconds: 0.0,
-										positionType: 0,
-										isRemChecked: false,
-									},
-								],
-								selectedColumnText: `Marsis CG Test Project - ${pagename()} - ${glo}`,
-								parserItem: null,
-							},
-						],
-						eventName: glo,
-					},
-					IsLoop: false,
-					BlockName: "",
-					uniquePINumber: "VlMvL8ze",
-					Thumbnail: "",
-					No: null,
-					Name: `CG EVENT - ${glo}`,
-					StartTime: "00:00:00",
-					Duration: "00:00:00:00",
-					In: "00:00:00:00",
-					Out: "00:00:00:00",
-					DoubleIn: 0.0,
-					DoubleOut: 0.0,
-					DoubleDuration: 0.0,
-					Category: "Event : CGEVENT",
-					Notes: `${glo}: 00:00:00 (+) Play`,
-					HouseID: "",
-					Metadata1: "",
-					Metadata2: "",
-					Metadata3: "",
-					Path: "",
-				};
-			}
+          // Function to check if the text is encoded in UTF-8
+          function isUTF8(text) {
+            try {
+              new TextDecoder("utf-8").decode(new Uint8Array(text));
+              return true;
+            } catch (error) {
+              return false;
+            }
+          }
+        }
+      });
 
-			function createDatePicker() {
-				let datePicker = document.createElement("input");
-				datePicker.setAttribute("type", "date");
-				datePicker.setAttribute("id", "date-picker");
-				const holder = document.querySelector(".holder");
-				holder.appendChild(datePicker);
+      function main(text) {
+        let index = 0;
+        let sepaIndex = 0;
+        text = text
+          .replaceAll(",,,", '","')
+          .replaceAll(",,", '"')
+          .replaceAll(",END", '"')
+          .replaceAll('""', '"');
 
-				datePicker.addEventListener("change", function () {
-					let selectedDate = datePicker.value;
-					const date = new Date(selectedDate);
-					day = date.getUTCDate().toString().padStart(2, "0");
-					month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-					year = date.getUTCFullYear().toString();
-					console.log(`Day: ${day}, Month: ${month}, Year: ${year}`);
-					let fileName = `${day}-${month}-${year}` + ".MP";
-					let fileContent = JSON.stringify(playlist());
-					saveTextFile(fileName, fileContent);
-				});
-			}
+        const lines = text.replaceAll('","', '"<>"').split(/\r?\n/);
+        for (let i = lines.length; i >= 0; i--) {
+          if (!lines[i]) continue;
 
-			function saveTextFile(fileName, fileContent) {
-				let blob = new Blob([fileContent], {
-					type: "text/plain",
-				});
-				let url = URL.createObjectURL(blob);
-				let link = document.createElement("a");
-				link.href = url;
-				link.download = fileName;
-				link.click();
-			}
+          index++;
+          if (types.includes(itemType(lines[i]))) {
+            output.push(makeMovie(itemToMovie(lines[i], index)));
+          } else {
+            output.push(
+              makeMovie(itemToMovie(separadores[sepaIndex++ % 8], index))
+            );
+            output.push(makeGraph(itemType(lines[i]), ++index));
 
-			function playlist() {
-				return {
-					playlistName: `${day}-${month}-${year}`,
-					startDate: `${year}/${month}/${day}`,
-					endDate: `${year}/${month}/${day}`,
-					startTime: "--:--:--",
-					endTime: "--:--:--",
-					duration: "00:00:30",
-					dblDur: "30.24",
-					playlistType: 1,
-					category: "General",
-					playlistPath: `D:\\Playlists\\${year}\\${month}\\${day}\\`,
-					PlaylistItems: output,
-				};
-			}
-		</script>
-	</body>
+            output.push(makeSong(itemToSong(lines[i], ++index)));
+          }
+        }
+        createDatePicker();
+      }
+
+      function itemType(line) {
+        return line.split("<>")[0].slice(1, -1);
+      }
+
+      function itemToSong(line, index) {
+        let singer = line.split("<>")[1].slice(1, -1).replaceAll("/", ",");
+        let song = line.split("<>")[2].slice(1, -1);
+        let dur = +line.split("<>")[3].slice(1, -1);
+        let category = line.split("<>")[4].slice(1, -1);
+
+        return { singer, song, dur, category, index };
+      }
+
+      function itemToMovie(line, index) {
+        let name = line.split("<>")[2].slice(1, -1);
+        let dur = +line.split("<>")[3].slice(1, -1);
+        let category = line.split("<>")[4].slice(1, -1);
+        return { name, dur, category, index };
+      }
+
+      function makeSong({ singer, song, dur, category, index }) {
+        let name = `${singer}-''${song}''-`;
+        return {
+          TrimmerSettings: {
+            ScaleType: "",
+            Interlace: "",
+            AspectRatio: "",
+            Deinterlace: false,
+            CropL: 0,
+            CropR: 0,
+            CropT: 0,
+            CropB: 0,
+            AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
+          },
+          OriginalDuration: dur + "",
+          index: index,
+          ItemType: 1,
+          ItemObject: "Video",
+          IsLoop: false,
+          uniquePINumber: "j/11zVFV",
+          No: null,
+          Name: name,
+          DoubleIn: 0.0,
+          DoubleOut: dur,
+          DoubleDuration: dur,
+          Path: `D:\\Videos\\${category}\\${name}.mp4`,
+        };
+      }
+
+      function makeMovie({ name, dur, category, index }) {
+        return {
+          TrimmerSettings: {
+            ScaleType: "",
+            Interlace: "",
+            AspectRatio: "",
+            Deinterlace: false,
+            CropL: 0,
+            CropR: 0,
+            CropT: 0,
+            CropB: 0,
+            AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
+          },
+          OriginalDuration: dur + "",
+          index: index,
+          ItemType: 1,
+          ItemObject: "Video",
+          IsLoop: false,
+          uniquePINumber: "j/11zVFV",
+          No: null,
+          Name: name,
+          DoubleIn: 0.0,
+          DoubleOut: dur,
+          DoubleDuration: dur,
+          Path: `D:\\Videos\\${category}\\${name}.mp4`,
+        };
+      }
+
+      function makeGraph(glo, index) {
+        const pagename = () => {
+          if (glo.match(/H/)) return "H100";
+          if (glo.match(/G[0]/)) return "G100";
+          if (glo.match(/G[1]/)) return "G200";
+          if (glo.match(/G[2]/)) return "G200";
+        };
+        return {
+          TrimmerSettings: {
+            ScaleType: "",
+            Interlace: "",
+            AspectRatio: "",
+            Deinterlace: false,
+            CropL: 0,
+            CropR: 0,
+            CropT: 0,
+            CropB: 0,
+            AudioInformations: "0~0|0~0|0~0|0~0|0~0|0~0|0~0|0~0|",
+          },
+          OriginalDuration: "0",
+          AutoStartDate: "",
+          AutoStartTime: "",
+          index: index,
+          ItemType: 14,
+          ItemObject: {
+            CGUniqueID: "1148d94eb5594a36b607dec865c709d5",
+            addedPresetList: [
+              {
+                projectName: "Marsis CG Test Project",
+                pageName: pagename(),
+                itemList: [{ itemShowName: glo }],
+                isGroup: false,
+                positionList: [
+                  {
+                    positionInSeconds: 0.0,
+                    positionType: 0,
+                    isRemChecked: false,
+                  },
+                ],
+                selectedColumnText: `Marsis CG Test Project - ${pagename()} - ${glo}`,
+                parserItem: null,
+              },
+            ],
+            eventName: glo,
+          },
+          IsLoop: false,
+          BlockName: "",
+          uniquePINumber: "VlMvL8ze",
+          Thumbnail: "",
+          No: null,
+          Name: `CG EVENT - ${glo}`,
+          StartTime: "00:00:00",
+          Duration: "00:00:00:00",
+          In: "00:00:00:00",
+          Out: "00:00:00:00",
+          DoubleIn: 0.0,
+          DoubleOut: 0.0,
+          DoubleDuration: 0.0,
+          Category: "Event : CGEVENT",
+          Notes: `${glo}: 00:00:00 (+) Play`,
+          HouseID: "",
+          Metadata1: "",
+          Metadata2: "",
+          Metadata3: "",
+          Path: "",
+        };
+      }
+
+      function createDatePicker() {
+        let datePicker = document.createElement("input");
+        datePicker.setAttribute("type", "date");
+        datePicker.setAttribute("id", "date-picker");
+        const holder = document.querySelector(".holder");
+        holder.appendChild(datePicker);
+
+        datePicker.addEventListener("change", function () {
+          let selectedDate = datePicker.value;
+          const date = new Date(selectedDate);
+          day = date.getUTCDate().toString().padStart(2, "0");
+          month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+          year = date.getUTCFullYear().toString();
+          console.log(`Day: ${day}, Month: ${month}, Year: ${year}`);
+          let fileName = `${day}-${month}-${year}` + ".MP";
+          let fileContent = JSON.stringify(playlist());
+          saveTextFile(fileName, fileContent);
+        });
+      }
+
+      function saveTextFile(fileName, fileContent) {
+        let blob = new Blob([fileContent], {
+          type: "text/plain",
+        });
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        link.click();
+      }
+
+      function playlist() {
+        return {
+          playlistName: `${day}-${month}-${year}`,
+          startDate: `${year}/${month}/${day}`,
+          endDate: `${year}/${month}/${day}`,
+          startTime: "--:--:--",
+          endTime: "--:--:--",
+          duration: "00:00:30",
+          dblDur: "30.24",
+          playlistType: 1,
+          category: "General",
+          playlistPath: `D:\\Playlists\\${year}\\${month}\\${day}\\`,
+          PlaylistItems: output,
+        };
+      }
+    </script>
+  </body>
 </html>
