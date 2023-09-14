@@ -78,14 +78,12 @@
     <script>
       "use strict";
       const separadores = {
-        0: '"SEPARADORES"<>""<>"separador_billboard_02_auriculares"<>"6.44"<>"sepas"',
-        1: '"SEPARADORES"<>""<>"separador_billboard_03_glitch"<>"5.14"<>"sepas"',
-        2: '"SEPARADORES"<>""<>"separador_billboard_04_cables"<>"12.99"<>"sepas"',
-        3: '"SEPARADORES"<>""<>"separador_billboard_06_glitch"<>"3.95"<>"sepas"',
-        4: '"SEPARADORES"<>""<>"separador_billboard_08_esfera"<>"8.0"<>"sepas"',
-        5: '"SEPARADORES"<>""<>"separador_billboard_09_ondas"<>"9.98"<>"sepas"',
-        6: '"SEPARADORES"<>""<>"separador_billboard_10_general"<>"9.94"<>"sepas"',
-        7: '"SEPARADORES"<>""<>"separador_billboard_11_distort"<>"4.5"<>"sepas"',
+        0: '"SEPARADORES"<>""<>"BLOG_AGO_2023_GLITCH3"<>"6.44"<>"sepas"',
+        1: '"SEPARADORES"<>""<>"BLOG_AGO_2023_GLITCH2"<>"5.14"<>"sepas"',
+        2: '"SEPARADORES"<>""<>"BLOG_AGO_2023_GLITCH"<>"12.99"<>"sepas"',
+        3: '"SEPARADORES"<>""<>"BLOG_AGOS_2023_03_CIRCLES"<>"3.95"<>"sepas"',
+        4: '"SEPARADORES"<>""<>"BLOG_AGOS_2023_05_BALLLOGO"<>"8.0"<>"sepas"',
+        5: '"SEPARADORES"<>""<>"BLOG_AGO_2023_ECUALIZADOR"<>"9.98"<>"sepas"',
       };
       const types = ["ENTREVISTAS", "TECH", "SEPARADORES", "NEWS", "TOP10"];
       let output = [];
@@ -281,7 +279,7 @@
             output.push(makeMovie(itemToMovie(lines[i], index)));
           } else {
             output.push(
-              makeMovie(itemToMovie(separadores[sepaIndex++ % 8], index))
+              makeMovie(itemToMovie(separadores[sepaIndex++ % 6], index))
             );
             output.push(makeGraph(itemType(lines[i]), ++index));
 
